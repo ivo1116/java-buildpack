@@ -74,8 +74,8 @@ module JavaBuildpack
       def canonical(raw)
         cooked = raw
                  .gsub(/\{default.repository.root\}/, @default_repository_root)
-                 .gsub(/\{platform\}/, platform)
-                 .gsub(/\{architecture\}/, architecture)
+                 .gsub('{platform}', platform)
+                 .gsub('{architecture}', architecture)
                  .chomp('/')
         @logger.debug { "#{raw} expanded to #{cooked}" }
         cooked
@@ -90,7 +90,9 @@ module JavaBuildpack
         elsif `uname -s` =~ /Darwin/
           'mountainlion'
         elsif `cat /etc/os-release | grep '^ID=' | cut -d'=' -f 2` =~ /ubuntu/
-          `cat /etc/os-release | grep '^VERSION_CODENAME=' | cut -d'=' -f 2`.strip
+          codename = `cat /etc/os-release | grep '^VERSION_CODENAME=' | cut -d'=' -f 2`.strip
+          # Map Ubuntu 24.04 (noble) to jammy since CF repository doesn't have noble binaries yet
+          codename == 'noble' ? 'jammy' : codename
         else
           raise 'Unable to determine platform'
         end
